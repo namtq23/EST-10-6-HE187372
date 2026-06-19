@@ -49,10 +49,13 @@ class ProductDAO {
   }
 
   static List<Product> findProductByName(String keyword) {
-    final lowerKeyword = keyword.toLowerCase();
-    return _products
-        .where((p) => p.name.toLowerCase().contains(lowerKeyword))
-        .toList();
+    List<Product> results = [];
+    for (var p in _products) {
+      if (p.name.toLowerCase().contains(keyword.toLowerCase())) {
+        results.add(p);
+      }
+    }
+    return results;
   }
 
   static Product? findProductById(int id) {

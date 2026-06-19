@@ -8,29 +8,37 @@ class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({super.key, required this.productId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     final product = ProductDAO.findProductById(productId);
 
     if (product == null) {
-      return const Center(child: Text('Không tìm thấy sản phẩm'));
+      return Scaffold(
+        appBar: AppBar(title: const Text('Lỗi')),
+        body: const Center(child: Text('Không tìm thấy sản phẩm')),
+      );
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildImage(context, product),
-                _buildInfo(product),
-                _buildPriceSection(product),
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(product.name),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildImage(context, product),
+                  _buildInfo(product),
+                  _buildPriceSection(product),
+                ],
+              ),
             ),
           ),
-        ),
-        _buildAddToCartButton(),
-      ],
+          _buildAddToCartButton(),
+        ],
+      ),
     );
   }
 

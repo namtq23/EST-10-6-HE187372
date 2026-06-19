@@ -1,31 +1,21 @@
 import 'package:flutter/material.dart';
-import '../data/product_dao.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/product_card.dart';
-import 'product_detail_page.dart';
+import '../providers/products_provider.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
-  int? _selectedProductId;
-
-  void _goToDetail(int id) {
-    setState(() {
-      _selectedProductId = id;
-      _selectedIndex = 1;
-    });
-  }
 
   Widget _buildCurrentPage() {
     switch (_selectedIndex) {
       case 1:
-        return ProductDetailPage(productId: _selectedProductId ?? 0);
-      case 2:
         return const Center(child: Text('Giỏ hàng (chưa có)'));
       default:
         return _buildHomePage();
@@ -33,13 +23,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   String _buildTitle() {
-    if (_selectedIndex == 1 && _selectedProductId != null) {
-      return ProductDAO.findProductById(_selectedProductId!)?.name ?? 'Product Detail';
-    }
-    switch (_selectedIndex) {
-      case 2:  return 'Cart';
-      default: return 'Product';
-    }
+    return _selectedIndex == 1 ? 'Cart' : 'Product';
   }
 
   @override
@@ -89,42 +73,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProductList() {
-    final products = ProductDAO.getAllProduct();
+    final products = ref.watch(productsProvider);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    if (isLandscape) {
-      final cardWidth = (screenWidth - 12 * 3) / 2;
-      return GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 10,
-          childAspectRatio: cardWidth / 110,
-        ),
-        itemCount: products.length,
-        itemBuilder: (_, i) => ProductCard(
-          product: products[i],
-          onTap: () => _goToDetail(products[i].id),
-        ),
-      );
-    } else {
-      final cardWidth = screenWidth - 24;
-      return ListView.separated(
-        padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (_, i) => SizedBox(
-          width: cardWidth,
-          child: ProductCard(
-            product: products[i],
-            onTap: () => _goToDetail(products[i].id),
-          ),
-        ),
-      );
-    }
+    final columns = isLandscape ? 2 : 1;
+
+    final cardWidth = (screenWidth - 12 * (columns + 1)) / columns;
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 10,
+        childAspectRatio: cardWidth / 110,
+      ),
+      itemCount: products.length,
+      itemBuilder: (_, i) => ProductCard(
+        product: products[i],
+      ),
+    );
   }
 
   Widget _buildNavBar() {
@@ -136,11 +106,6 @@ class _HomePageState extends State<HomePage> {
           icon: Icon(Icons.home_outlined),
           selectedIcon: Icon(Icons.home),
           label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.inventory_2_outlined),
-          selectedIcon: Icon(Icons.inventory_2),
-          label: 'Product Detail',
         ),
         NavigationDestination(
           icon: Icon(Icons.shopping_cart_outlined),

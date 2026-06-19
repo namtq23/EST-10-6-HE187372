@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../data/product.dart';
+import '../pages/product_detail_page.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final VoidCallback? onTap;
 
-  const ProductCard({super.key, required this.product, this.onTap});
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,14 @@ class ProductCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(productId: product.id),
+            ),
+          );
+        },
         child: Stack(
           children: [
             Row(
@@ -40,7 +47,8 @@ class ProductCard extends StatelessWidget {
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => Container(
           color: Colors.grey[200],
-          child: const Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+          child: const Icon(Icons.image_not_supported,
+              size: 40, color: Colors.grey),
         ),
       ),
     );
@@ -86,8 +94,8 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildBadge() {
     return Positioned(
-      top: 8,
-      right: 8,
+      top: 10,
+      right: 10,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
